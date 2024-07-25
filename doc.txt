@@ -1,0 +1,15 @@
+after installing composer, run:
+    composer dump-autoload
+
+
+
+ http post http://localhost/api05/tasks name="a new task" priority=3
+
+ 
+  http http://localhost/api05/tasks X-API-Key:ffc9116e4137fe4404efb3c4e802c8cd
+
+  
+  var_dump($_SERVER["HTTP_AUTHORIZATION"]);
+  http http://localhost/api05/tasks/6 "Authorization:Bearer 1bs33"
+
+  
