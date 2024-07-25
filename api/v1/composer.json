@@ -1,0 +1,22 @@
+{
+    "name": "deln/linea-express-api",
+    "description": "Linea Express API",
+    "license": "proprietary",
+    "require": {
+        "bcosca/fatfree-core": "^3.8",
+        "vlucas/phpdotenv": "^5.4",
+        "mailjet/mailjet-apiv3-php": "^1.5",
+        "phpmailer/phpmailer": "^6.6",
+        "stripe/stripe-php": "^10.2",
+        "phpoffice/phpspreadsheet": "^1.26",
+        "twilio/sdk": "^7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "": "src/",
+            "Controllers\\": "src/controllers/",
+            "Data\\": "src/data/",
+            "Util\\": "src/util/"
+        }
+    }
+}
