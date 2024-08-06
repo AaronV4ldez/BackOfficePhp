@@ -219,9 +219,9 @@ class LEApi
         $baseURL = $_ENV["TP_BASE_URL"];
         $fullUrlTemplate = $baseURL . LE_API_URL_CARS_CROSS_NEW;
     
-        $allResults = []; // Array para acumular todos los resultados
+        $allResults = [];
     
-        // Definir los diferentes rangos de fechas para las cinco búsquedas
+        // Definir los diferentes rangos de fechas para las búsquedas
         $dateRanges = [
             ['fi' => date("Ymd", strtotime("-31 days")), 'ff' => date("Ymd")],
             ['fi' => date("Ymd", strtotime("-62 days")), 'ff' => date("Ymd", strtotime("-31 days"))],
@@ -238,6 +238,9 @@ class LEApi
             ['fi' => date("Ymd", strtotime("-403 days")), 'ff' => date("Ymd", strtotime("-372 days"))],
             ['fi' => date("Ymd", strtotime("-434 days")), 'ff' => date("Ymd", strtotime("-403 days"))]
         ];
+    
+        // Array asociativo para evitar duplicados
+        $uniqueResults = [];
     
         foreach ($dateRanges as $index => $range) {
             $fullUrl = \str_replace("@tag", $tag, $fullUrlTemplate);
@@ -261,11 +264,13 @@ class LEApi
             if ($httpCode == 200) {
                 $result = \json_decode($result, true);
                 if ($result !== null) {
-                    // Acumular los resultados obtenidos
-                    $allResults = array_merge($allResults, $result);
-    
                     foreach ($result as $record) {
-                        self::insertdb($record);
+                        // Crear una clave única para cada registro basado en idOperador y fechaHoraCruce
+                        $uniqueKey = $record['fechaHoraCruce'];
+                        // Verificar si ya existe en el array asociativo
+                        if (!isset($uniqueResults[$uniqueKey])) {
+                            $uniqueResults[$uniqueKey] = $record;
+                        }
                     }
                 } else {
                     error_log("Error decoding JSON response for range index $index: " . json_last_error_msg());
@@ -273,6 +278,14 @@ class LEApi
             } else {
                 error_log("Error fetching data for range index $index: HTTP $httpCode");
             }
+        }
+    
+        // Convertir el array asociativo a un array simple
+        $allResults = array_values($uniqueResults);
+    
+        // Insertar los registros únicos en la base de datos
+        foreach ($allResults as $record) {
+            self::insertdb($record);
         }
     
         // Devolver todos los resultados en un solo JSON
@@ -284,7 +297,7 @@ class LEApi
     public static function insertdb($record)
     {
         try {
-            $dsn = 'mysql:host=127.0.0.1;dbname=LIEX_QA;charset=utf8';
+            $dsn = 'mysql:host=127.0.0.1;dbname=liex;charset=utf8';
             $username = 'liex_user';
             $password = 'line@infernal656';
             $options = [
